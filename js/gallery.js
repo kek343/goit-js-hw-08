@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
-const galleryContainer = document.querySelector('.gallery');
+  const galleryContainer = document.querySelector('.gallery');
 
-const images = [
+  const images = [
     {
       preview:
         "https://cdn.pixabay.com/photo/2019/05/14/16/43/rchids-4202820__480.jpg",
@@ -67,51 +67,60 @@ const images = [
     },
   ];
 
-function createGalleryItem({ preview, original, description }) {
-  const listItem = document.createElement('li');
-  listItem.classList.add('gallery-item');
+  function createGalleryItem({ preview, original, description }) {
+    const listItem = document.createElement('li');
+    listItem.classList.add('gallery-item');
 
-  const link = document.createElement('a');
-  link.classList.add('gallery-link');
-  link.href = original;
+    const link = document.createElement('a');
+    link.classList.add('gallery-link');
+    link.href = original;
 
-  const image = document.createElement('img');
-  image.classList.add('gallery-image');
-  image.src = preview;
-  image.alt = description;
-  image.setAttribute('data-source', original);
+    const image = document.createElement('img');
+    image.classList.add('gallery-image');
+    image.src = preview;
+    image.alt = description;
+    image.setAttribute('data-source', original);
 
-  link.appendChild(image);
-  listItem.appendChild(link);
+    link.appendChild(image);
+    listItem.appendChild(link);
 
-  return listItem;
-}
-
-function onGalleryItemClick(event) {
-  event.preventDefault();
-
-  if (event.target.nodeName !== 'IMG') {
-    return;
+    return listItem;
   }
 
-  const largeImageUrl = event.target.dataset.source;
+  function onGalleryItemClick(event) {
+    event.preventDefault();
 
-  const instance = basicLightbox.create(`<img width="800" height="600" src="${largeImageUrl}">`);
-
-  instance.show();
-  window.addEventListener('keyup', function (e) {
-    if (e.key === 'Escape' && instance.visible()) {
-      instance.close();
+    if (event.target.nodeName !== 'IMG') {
+      return;
     }
-  });
-}
 
-function renderGallery(images) {
-  const galleryItems = images.map(createGalleryItem);
+    const largeImageUrl = event.target.dataset.source;
 
-  galleryContainer.append(...galleryItems);
-}
+    const instance = basicLightbox.create(`<img width="800" height="600" src="${largeImageUrl}">`);
 
-galleryContainer.addEventListener('click', onGalleryItemClick);
+    instance.show();
 
-renderGallery(images); });
+    function handleKeyUp(e) {
+      if (e.key === 'Escape' && instance.visible()) {
+        instance.close();
+        window.removeEventListener('keyup', handleKeyUp);
+      }
+    }
+
+    window.addEventListener('keyup', handleKeyUp);
+
+    instance.on('close', () => {
+      window.removeEventListener('keyup', handleKeyUp);
+    });
+  }
+
+  function renderGallery(images) {
+    const galleryItems = images.map(createGalleryItem);
+
+    galleryContainer.append(...galleryItems);
+  }
+
+  galleryContainer.addEventListener('click', onGalleryItemClick);
+
+  renderGallery(images);
+});
